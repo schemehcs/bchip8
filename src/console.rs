@@ -1,9 +1,19 @@
-use std::time::{Duration, Instant};
-use std::io;
-use crossterm::{event::{self, Event, KeyCode, KeyEventKind, KeyboardEnhancementFlags, PopKeyboardEnhancementFlags, PushKeyboardEnhancementFlags}, execute};
+use crossterm::{
+    event::{
+        self, Event, KeyCode, KeyEventKind, KeyboardEnhancementFlags, PopKeyboardEnhancementFlags,
+        PushKeyboardEnhancementFlags,
+    },
+    execute,
+};
 use ratatui::style;
-use ratatui::{buffer::Buffer, layout::{Position, Rect}, widgets::{Block, Widget}, DefaultTerminal};
-use anyhow;
+use ratatui::{
+    DefaultTerminal,
+    buffer::Buffer,
+    layout::{Position, Rect},
+    widgets::{Block, Widget},
+};
+use std::io;
+use std::time::{Duration, Instant};
 
 pub const WIDTH: usize = 64;
 pub const HEIGHT: usize = 32;
@@ -11,7 +21,7 @@ pub const HEIGHT: usize = 32;
 #[derive(Debug)]
 pub enum Key {
     Quit,
-    Num(u8)
+    Num(u8),
 }
 
 #[derive(Debug)]
@@ -41,7 +51,8 @@ impl<'a> Widget for Screen<'a> {
                         for px in 0..pixel_width {
                             let rx = area.x + (x as u16) * pixel_width + px;
                             let ry = area.y + (y as u16) * pixel_height + py;
-                            buf.cell_mut(Position::new(rx, ry)).unwrap()
+                            buf.cell_mut(Position::new(rx, ry))
+                                .unwrap()
                                 .set_fg(style::Color::LightGreen)
                                 .set_symbol("█");
                         }
@@ -92,9 +103,11 @@ impl Console {
     }
 
     pub fn draw(&mut self, display_buffer: &[[bool; WIDTH]; HEIGHT]) -> anyhow::Result<()> {
-        match self.terminal.draw(|frame| {
-                frame.render_widget(Screen::new(display_buffer), frame.area()) }) {
-            Ok(_) => return Ok(()),
+        match self
+            .terminal
+            .draw(|frame| frame.render_widget(Screen::new(display_buffer), frame.area()))
+        {
+            Ok(_) => Ok(()),
             Err(e) => anyhow::bail!("failed to render screen {}", e),
         }
     }
@@ -106,17 +119,13 @@ impl Console {
         while start.elapsed() < timeout {
             if event::poll(no_wait)? {
                 match event::read()? {
-                    Event::Key(key) => {
-                        match self.handle_key_code(key.code) {
-                            Some(k) => {
-                                match key.kind {
-                                    KeyEventKind::Press => keys.push(KeyEvent::Pressed(k)),
-                                    KeyEventKind::Repeat => keys.push(KeyEvent::Pressed(k)),
-                                    KeyEventKind::Release => keys.push(KeyEvent::Released(k)),
-                                }
-                            },
-                            None => continue,
-                        }
+                    Event::Key(key) => match self.handle_key_code(key.code) {
+                        Some(k) => match key.kind {
+                            KeyEventKind::Press => keys.push(KeyEvent::Pressed(k)),
+                            KeyEventKind::Repeat => keys.push(KeyEvent::Pressed(k)),
+                            KeyEventKind::Release => keys.push(KeyEvent::Released(k)),
+                        },
+                        None => continue,
                     },
                     _ => continue,
                 }

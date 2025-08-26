@@ -197,7 +197,7 @@ impl fmt::Display for Operation {
 pub fn parse_opcode(opcode: u16) -> Operation {
     use Operation::*;
     let op_category = op0(opcode);
-    let opcode = match op_category {
+    match op_category {
         0x0 => match oph1(opcode) {
             0xEE => Return,
             0xE0 => Clear,
@@ -251,10 +251,8 @@ pub fn parse_opcode(opcode: u16) -> Operation {
             _ => Unknown(opcode),
         },
         _ => Unknown(opcode),
-    };
-    opcode
+    }
 }
-
 
 fn oph1(opcode: u16) -> u8 {
     (opcode & 0xFF) as u8

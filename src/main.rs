@@ -1,14 +1,13 @@
 mod cartridge;
+mod console;
 mod font;
 mod machine;
 mod opcode;
-mod console;
 
-use std::{fs, time::Duration};
-use anyhow;
 use clap::Parser;
-use std::path;
 use machine::Machine;
+use std::path;
+use std::{fs, time::Duration};
 
 #[derive(Parser)]
 #[command(version, about, long_about=None)]
@@ -17,14 +16,13 @@ struct Cli {
     cartridge: path::PathBuf,
 
     #[arg(long, short, default_value_t = false)]
-    assemble: bool,
+    disassemble: bool,
 
-    #[arg(long, short, default_value_t = 200)]
+    #[arg(long, short, default_value_t = 1000)]
     cycle_micro: u64,
 
     #[arg(long, short, default_value = "chip8.log")]
-    log_file: path::PathBuf
-
+    log_file: path::PathBuf,
 }
 
 fn main() -> anyhow::Result<()> {
@@ -34,7 +32,7 @@ fn main() -> anyhow::Result<()> {
         .target(env_logger::Target::Pipe(Box::new(log_file)))
         .init();
     let cartridge = cartridge::load_cartridge(&cli.cartridge)?;
-    if cli.assemble {
+    if cli.disassemble {
         cartridge::debug_cartridge(&cartridge);
         return Ok(());
     }

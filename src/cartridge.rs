@@ -1,7 +1,6 @@
-use anyhow;
+use crate::opcode;
 use std::fs;
 use std::path;
-use crate::opcode;
 
 pub const CARTRIDGE_ADDRESS: usize = 0x200;
 
